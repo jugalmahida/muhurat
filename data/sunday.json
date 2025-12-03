@@ -1,0 +1,86 @@
+{
+  "day": [
+    {
+      "name": "Udveg",
+      "start": "06:00 AM",
+      "end": "07:30 AM"
+    },
+    {
+      "name": "Chal",
+      "start": "07:30 AM",
+      "end": "09:00 AM"
+    },
+    {
+      "name": "Labh",
+      "start": "09:00 AM",
+      "end": "10:30 AM"
+    },
+    {
+      "name": "Amrit",
+      "start": "10:30 AM",
+      "end": "12:00 AM"
+    },
+    {
+      "name": "Kaal",
+      "start": "12:00 AM",
+      "end": "01:30 PM"
+    },
+    {
+      "name": "Shubh",
+      "start": "01:30 PM",
+      "end": "03:00 PM"
+    },
+    {
+      "name": "Rog",
+      "start": "03:00 PM",
+      "end": "04:30 PM"
+    },
+    {
+      "name": "Udveg",
+      "start": "04:30 PM",
+      "end": "06:00 PM"
+    }
+  ],
+  "night": [
+    {
+      "name": "Shubh",
+      "start": "06:00 PM",
+      "end": "07:30 PM"
+    },
+    {
+      "name": "Amrit",
+      "start": "07:30 PM",
+      "end": "09:00 PM"
+    },
+    {
+      "name": "Chal",
+      "start": "09:00 PM",
+      "end": "10:30 PM"
+    },
+    {
+      "name": "Rog",
+      "start": "10:30 PM",
+      "end": "12:00 AM"
+    },
+    {
+      "name": "Kaal",
+      "start": "12:00 AM",
+      "end": "01:30 AM"
+    },
+    {
+      "name": "Labh",
+      "start": "01:30 AM",
+      "end": "03:00 AM"
+    },
+    {
+      "name": "Udveg",
+      "start": "03:00 AM",
+      "end": "04:30 AM"
+    },
+    {
+      "name": "Shubh",
+      "start": "04:30 AM",
+      "end": "06:00 AM"
+    }
+  ]
+}

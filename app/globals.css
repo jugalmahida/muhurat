@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
+/* Your custom styles below */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --saffron-50: #fff5e6;
+  --saffron-100: #ffebd1;
+  --saffron-200: #ffd6a3;
+  --saffron-300: #ffc275;
+  --saffron-400: #ff9933; /* Classic Saffron */
+  --saffron-500: #e67300;
+  --saffron-600: #cc6600;
+  --saffron-700: #994d00;
+  --saffron-800: #663300;
+  --saffron-900: #331a00;
+
+  --maroon-500: #800000;
+  --maroon-600: #600000;
+
+  --gold-400: #FFD700;
+  --gold-500: #DAA520;
+
+  --cream: #FFFDD0;
+
+  --font-serif: "Cinzel Decorative", serif;
+  --font-hindi: "Gotu", sans-serif;
+  --font-body: "Laila", serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Background like your HTML example */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--cream);
+  background-image:
+    radial-gradient(#e5e5f7 1px, transparent 1px),
+    radial-gradient(#e5e5f7 1px, var(--cream) 1px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  font-family: var(--font-body);
+}
+
+/* Optional utility helpers */
+.font-serif-custom {
+  font-family: var(--font-serif);
+}
+
+.font-hindi {
+  font-family: var(--font-hindi);
+}
+
+.text-saffron-400 {
+  color: var(--saffron-400);
+}
+
+.bg-saffron-400 {
+  background-color: var(--saffron-400);
+}
+
+/* Slow spin animation equivalent */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 60s linear infinite;
 }
