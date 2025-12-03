@@ -38,6 +38,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   };
   const formattedDate = currentTime.toLocaleDateString("en-IN", dateOptions);
 
+  // Format muhurat duration: 3:00 - 4:30
+  const formatMuhuratDuration = (muhurat: Choghadiya) => {
+    const startTime = muhurat.startTime.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+    const endTime = muhurat.endTime.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${startTime} - ${endTime}`;
+  };
+
+  const muhuratDuration = formatMuhuratDuration(currentMuhurat);
+
   return (
     <section className="w-full max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-6">
       {/* Left: Current Status Card */}
@@ -98,9 +115,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </motion.div>
           </motion.div>
 
-          <h2 className="text-xl font-hindi text-maroon-800 mb-4 tracking-wide uppercase">
+          <h2 className="text-xl font-hindi text-maroon-800 mb-2 tracking-wide uppercase">
             Current Muhurat
           </h2>
+
+          {/* Muhurat Duration - NEW */}
 
           <AnimatePresence mode="wait">
             <motion.h3
@@ -115,6 +134,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               {currentMuhurat.name}
             </motion.h3>
           </AnimatePresence>
+
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
+            className={`px-3 py-1 rounded-2xl font-mono font-bold text-2xl mb-4 tracking-wider shadow-lg backdrop-blur-sm
+              ${
+                isGood
+                  ? "bg-green-500/20 border-2 border-green-400 text-green-900"
+                  : "bg-red-500/20 border-2 border-red-400 text-red-900"
+              }
+            `}
+          >
+            {muhuratDuration}
+          </motion.div>
 
           {/* Description */}
           <div className="mb-6 max-w-xs mx-auto">
