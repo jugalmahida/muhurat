@@ -62,8 +62,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         className={`relative overflow-hidden rounded-3xl p-8 border-[3px] shadow-2xl transition-colors duration-500
           ${
             isGood
-              ? "border-green-600 bg-gradient-to-br from-green-50 to-saffron-50"
-              : "border-red-700 bg-gradient-to-br from-red-50 to-orange-50"
+              ? "border-green-600 bg-linear-to-br from-green-50 to-saffron-50"
+              : "border-red-700 bg-linear-to-br from-red-50 to-orange-50"
           }
         `}
         initial={{ x: -50, opacity: 0 }}
@@ -161,8 +161,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             className={`px-8 py-2 rounded-full font-bold text-white shadow-lg tracking-widest text-sm uppercase transition-colors 
             ${
               isGood
-                ? "bg-gradient-to-r from-green-600 to-green-700"
-                : "bg-gradient-to-r from-red-600 to-red-700"
+                ? "bg-linear-to-r from-green-600 to-green-700"
+                : "bg-linear-to-r from-red-600 to-red-700"
             }
           `}
           >

@@ -65,7 +65,7 @@ export default function Home() {
         <UpcomingList choghadiyas={choghadiyas} currentTime={currentTime} />
       </motion.main>
 
-      <footer className="w-full text-center py-6 text-maroon-600/60 font-serif text-sm relative z-10">
+      <footer className="w-full text-center text-maroon-600/60 font-serif text-sm relative z-10">
         <p>Values are approximate based on 6:00 AM - 6:00 PM cycle.</p>
         <p>
           © {new Date().getFullYear()} Vedic Moments. Built with devotion by{" "}
