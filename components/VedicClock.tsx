@@ -1,6 +1,6 @@
-import React from "react";
-import { motion } from "motion/react";
-import { Choghadiya } from "../utils/vedicTime";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Choghadiya, formatTime } from "../utils/vedicTime";
 
 interface VedicClockProps {
   choghadiyas: Choghadiya[];
@@ -13,6 +13,8 @@ export const VedicClock: React.FC<VedicClockProps> = ({
   currentMuhurat,
   currentTime,
 }) => {
+  const [hoveredSegment, setHoveredSegment] = useState<Choghadiya | null>(null);
+
   // Filter for only day or night based on current time
   const isNightTime = currentMuhurat?.isNight ?? false;
   const visibleSegments = choghadiyas.filter((c) => c.isNight === isNightTime);
@@ -42,16 +44,47 @@ export const VedicClock: React.FC<VedicClockProps> = ({
 
   // Arrow Configuration
   const arrowLength = radius * 0.6;
-  // Calculate specific points for the arrow head relative to 0 (start)
   const tipX = arrowLength * 0.9;
   const baseX = arrowLength * 0.7;
   const headSize = 8;
 
-  // Align hand (+45 degrees offset based on your original logic)
+  // Align hand (+45 degrees offset based on logic)
   const handAngle = rotationDegrees + 45;
 
   return (
     <div className="relative flex flex-col items-center justify-center">
+      {/* Tooltip Overlay */}
+      <AnimatePresence>
+        {hoveredSegment && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          >
+            <div className="bg-white/95 backdrop-blur-sm shadow-xl border border-gold-200 rounded-lg p-3 text-center min-w-[140px]">
+              <p className="text-sm font-bold text-maroon-800 font-serif">
+                {hoveredSegment.name}
+              </p>
+              <div className="h-px w-full bg-gold-200 my-1" />
+              <p className="text-xs font-mono font-bold text-gray-600">
+                {formatTime(hoveredSegment.startTime)} -{" "}
+                {formatTime(hoveredSegment.endTime)}
+              </p>
+              <p
+                className={`text-[10px] uppercase tracking-wider font-bold mt-1 ${
+                  hoveredSegment.status === "Good"
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {hoveredSegment.status}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="relative w-[340px] h-[340px] flex items-center justify-center">
         {/* Decorative Outer Rings */}
         <div className="absolute inset-0 border-maroon-600 rounded-full opacity-10" />
@@ -79,10 +112,18 @@ export const VedicClock: React.FC<VedicClockProps> = ({
             const fillColor = segment.status === "Good" ? "#047857" : "#991b1b";
 
             const midAngle = (startAngle + endAngle) / 2;
+
+            // Name Label Position (Inner)
             const labelX =
-              center + radius * 0.65 * Math.cos((midAngle * Math.PI) / 180);
+              center + radius * 0.6 * Math.cos((midAngle * Math.PI) / 180);
             const labelY =
-              center + radius * 0.65 * Math.sin((midAngle * Math.PI) / 180);
+              center + radius * 0.6 * Math.sin((midAngle * Math.PI) / 180);
+
+            // Number Label Position (Outer Edge)
+            const numX =
+              center + radius * 0.9 * Math.cos((midAngle * Math.PI) / 180);
+            const numY =
+              center + radius * 0.9 * Math.sin((midAngle * Math.PI) / 180);
 
             return (
               <motion.g
@@ -90,20 +131,29 @@ export const VedicClock: React.FC<VedicClockProps> = ({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: index * 0.05 }}
+                onMouseEnter={() => setHoveredSegment(segment)}
+                onMouseLeave={() => setHoveredSegment(null)}
+                className="cursor-pointer"
               >
                 <path
                   d={`M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`}
                   fill={fillColor}
-                  fillOpacity={isCurrent ? 0.85 : 0.15}
+                  fillOpacity={
+                    isCurrent || hoveredSegment === segment ? 0.9 : 0.2
+                  }
                   stroke="#FFFDD0"
                   strokeWidth="2"
-                  className="transition-all duration-300"
+                  className="transition-all duration-300 hover:brightness-110"
                 />
+
+                {/* Segment Name */}
                 <text
                   x={labelX}
                   y={labelY}
-                  fill={isCurrent ? "#FFF" : "#5a3a1a"}
-                  fontSize={isCurrent ? "18" : "14"}
+                  fill={
+                    isCurrent || hoveredSegment === segment ? "#FFF" : "#5a3a1a"
+                  }
+                  fontSize={isCurrent ? "16" : "12"}
                   fontWeight="bold"
                   textAnchor="middle"
                   alignmentBaseline="middle"
@@ -112,36 +162,29 @@ export const VedicClock: React.FC<VedicClockProps> = ({
                 >
                   {segment.name}
                 </text>
+
+                {/* Segment Number (1-8) */}
+                <text
+                  x={numX}
+                  y={numY}
+                  fill={
+                    isCurrent || hoveredSegment === segment ? "#FFF" : "#5a3a1a"
+                  }
+                  fillOpacity="0.7"
+                  fontSize="10"
+                  fontWeight="bold"
+                  textAnchor="middle"
+                  alignmentBaseline="middle"
+                  className="font-mono select-none pointer-events-none"
+                  transform={`rotate(90, ${numX}, ${numY})`}
+                >
+                  {index + 1}
+                </text>
               </motion.g>
             );
           })}
 
-          {/* --- FIX START --- */}
-
-          {/* 1. Yellow Base Cap (Now Static and outside the rotating group) */}
-          
-          {/* <circle cx={center} cy={center} r={6} fill="#DAA520" />
-          <motion.g
-         
-            animate={{ rotate: handAngle, x: center, y: center }}
-            transition={{ type: "spring", stiffness: 50, damping: 15 }}
-          >
-            <line
-              x1={0}
-              y1={0}
-              x2={baseX}
-              y2={0}
-              stroke="#DAA520"
-              strokeWidth={4}
-              strokeLinecap="round"
-            />
-            <path
-              d={`M ${tipX} 0 L ${baseX} ${-headSize} L ${baseX} ${headSize} Z`}
-              fill="#DAA520"
-            />
-          </motion.g> */}
-
-          {/* 3. Center Knob (Static on top) */}
+          {/* Center Knob (Static on top) */}
           <circle
             cx={center}
             cy={center}
@@ -149,8 +192,8 @@ export const VedicClock: React.FC<VedicClockProps> = ({
             fill="#800000"
             stroke="#DAA520"
             strokeWidth="3"
+            className="pointer-events-none"
           />
-          {/* --- FIX END --- */}
         </svg>
       </div>
 

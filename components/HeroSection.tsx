@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Choghadiya,
@@ -13,7 +14,14 @@ import {
   Calendar,
   CheckCircle2,
   AlertCircle,
+  Sunrise,
+  Sunset,
+  Loader2,
+  MapPin,
 } from "lucide-react";
+import { useSunriseAndSunset } from "@/hooks/useSunriseAndSunset";
+import { useGeoLocation } from "@/hooks/useGeoLocation";
+import { LocationPermissionModal } from "./LocationPermissionModal";
 
 interface HeroSectionProps {
   choghadiyas: Choghadiya[];
@@ -27,6 +35,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   currentTime,
 }) => {
   if (!currentMuhurat) return null;
+
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [hasAskedPermission, setHasAskedPermission] = useState(false);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   const isGood = currentMuhurat.status === "Good";
 
@@ -55,6 +67,88 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   const muhuratDuration = formatMuhuratDuration(currentMuhurat);
 
+  const {
+    getSunriseAndSunset,
+    sunsetSunriseData,
+    sunsetSunriseError,
+    sunsetSunriseLoading,
+  } = useSunriseAndSunset();
+
+  const { getLocation, location, locationError, locationLoading } =
+    useGeoLocation();
+
+  // Show modal only once on component mount (client-side only)
+  useEffect(() => {
+    const hasAskedBefore = localStorage.getItem("locationPermissionAsked");
+    const cachedLocation = localStorage.getItem("cached_location");
+
+    // If we have cached location, don't show modal
+    if (cachedLocation) {
+      setHasAskedPermission(true);
+      return;
+    }
+
+    // If we haven't asked before, show modal
+    if (!hasAskedBefore) {
+      setShowLocationModal(true);
+    } else {
+      setHasAskedPermission(true);
+      // Check if permission was denied
+      const denied = localStorage.getItem("locationPermissionDenied");
+      if (denied === "true") {
+        setPermissionDenied(true);
+      }
+    }
+  }, []);
+
+  // When location is obtained, fetch sunrise/sunset data
+  useEffect(() => {
+    console.log("location ", location);
+
+    if (location && location.lat && location.lng) {
+      console.log("Location obtained:", location);
+      getSunriseAndSunset(location);
+      // Clear permission denied flag on success
+      setPermissionDenied(false);
+      localStorage.removeItem("locationPermissionDenied");
+    }
+  }, [location, getSunriseAndSunset]);
+
+  // Monitor location error to detect permission denial
+  useEffect(() => {
+    if (locationError && locationError.includes("denied")) {
+      setPermissionDenied(true);
+      localStorage.setItem("locationPermissionDenied", "true");
+    }
+  }, [locationError]);
+
+  const handleGetSunriseSunset = () => {
+    console.log("User clicked Allow Location");
+    setShowLocationModal(false);
+    setHasAskedPermission(true);
+    localStorage.setItem("locationPermissionAsked", "true");
+    getLocation();
+  };
+
+  const handleModalClose = () => {
+    console.log("User declined location");
+    setShowLocationModal(false);
+    setHasAskedPermission(true);
+    setPermissionDenied(true);
+    localStorage.setItem("locationPermissionAsked", "true");
+    localStorage.setItem("locationPermissionDenied", "true");
+  };
+
+  const handleRetryLocation = () => {
+    console.log("User clicked retry location");
+    setShowLocationModal(true);
+  };
+
+  const isLoadingSunData = locationLoading || sunsetSunriseLoading;
+  const hasError = locationError || sunsetSunriseError;
+  const showRetryButton =
+    permissionDenied && !sunsetSunriseData && !isLoadingSunData;
+
   return (
     <section className="w-full max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-6">
       {/* Left: Current Status Card */}
@@ -62,8 +156,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         className={`relative overflow-hidden rounded-3xl p-8 border-[3px] shadow-2xl transition-colors duration-500
           ${
             isGood
-              ? "border-green-600 bg-linear-to-br from-green-50 to-saffron-50"
-              : "border-red-700 bg-linear-to-br from-red-50 to-orange-50"
+              ? "border-green-600 bg-gradient-to-br from-green-50 to-saffron-50"
+              : "border-red-700 bg-gradient-to-br from-red-50 to-orange-50"
           }
         `}
         initial={{ x: -50, opacity: 0 }}
@@ -72,12 +166,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       >
         {/* Background Decorative Pattern */}
         <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/mandala.png')]"></div>
-
-        {/* Decorative Corners */}
-        <div className="absolute top-2 left-2 w-8 h-8 border-t-2 border-l-2 border-gold-500 rounded-tl-lg"></div>
-        <div className="absolute top-2 right-2 w-8 h-8 border-t-2 border-r-2 border-gold-500 rounded-tr-lg"></div>
-        <div className="absolute bottom-2 left-2 w-8 h-8 border-b-2 border-l-2 border-gold-500 rounded-bl-lg"></div>
-        <div className="absolute bottom-2 right-2 w-8 h-8 border-b-2 border-r-2 border-gold-500 rounded-br-lg"></div>
 
         <div className="relative z-10 flex flex-col items-center text-center">
           {/* Top Date & Time Row */}
@@ -119,8 +207,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             Current Muhurat
           </h2>
 
-          {/* Muhurat Duration - NEW */}
-
           <AnimatePresence mode="wait">
             <motion.h3
               key={currentMuhurat.name}
@@ -151,8 +237,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </motion.div>
 
           {/* Description */}
-          <div className="mb-6 max-w-xs mx-auto">
-            <p className="text-maroon-700 font-body text-lg italic leading-relaxed">
+          <div className="mb-4 mx-auto">
+            <p className="text-maroon-700 font-body text-md italic leading-relaxed">
               "{getMuhuratDescription(currentMuhurat.name)}"
             </p>
           </div>
@@ -161,15 +247,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             className={`px-8 py-2 rounded-full font-bold text-white shadow-lg tracking-widest text-sm uppercase transition-colors 
             ${
               isGood
-                ? "bg-linear-to-r from-green-600 to-green-700"
-                : "bg-linear-to-r from-red-600 to-red-700"
+                ? "bg-gradient-to-r from-green-600 to-green-700"
+                : "bg-gradient-to-r from-red-600 to-red-700"
             }
           `}
           >
             {isGood ? "Shubh (Good)" : "Ashubh (Bad)"}
           </div>
 
-          <div className="mt-6 flex items-center justify-center space-x-2 text-sm text-gray-500 bg-white/50 px-4 py-1 rounded-full border border-gold-400/30">
+          <div className="mt-4 flex items-center justify-center space-x-2 text-sm text-gray-500 bg-white/50 px-4 py-1 rounded-full border border-gold-400/30">
             {currentMuhurat.isNight ? (
               <Moon size={14} className="text-blue-600" />
             ) : (
@@ -178,6 +264,89 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <span className="font-semibold">
               {currentMuhurat.isNight ? "Ratri" : "Din"} (Night/Day) Cycle
             </span>
+          </div>
+
+          {/* Sun Timings Section - Integrated */}
+          <div className="w-full">
+            {isLoadingSunData && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center gap-3 mt-6"
+              >
+                <Loader2 size={32} className="text-orange-500 animate-spin" />
+                <p className="text-sm text-maroon-600 font-semibold">
+                  Fetching sun timings...
+                </p>
+              </motion.div>
+            )}
+
+            {!isLoadingSunData && sunsetSunriseData && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="space-y-3"
+              >
+                <div className="mt-6 border-t border-maroon-700/10" />
+                <h4 className="text-sm font-hindi font-bold text-maroon-800 uppercase tracking-wide">
+                  Sun Timings
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col items-center bg-white/60 rounded-xl p-3 border border-orange-200 shadow-sm">
+                    <Sunrise size={20} className="text-orange-500 mb-1" />
+                    <span className="text-xs text-maroon-600 font-semibold mb-1">
+                      Sunrise
+                    </span>
+                    <span className="text-base font-mono font-bold text-maroon-800">
+                      {sunsetSunriseData.results.sunrise}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center bg-white/60 rounded-xl p-3 border border-orange-200 shadow-sm">
+                    <Sunset size={20} className="text-red-500 mb-1" />
+                    <span className="text-xs text-maroon-600 font-semibold mb-1">
+                      Sunset
+                    </span>
+                    <span className="text-base font-mono font-bold text-maroon-800">
+                      {sunsetSunriseData.results.sunset}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Retry Button for Denied Permission */}
+            {showRetryButton && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-6 space-y-3"
+              >
+                <div className="border-t border-maroon-700/10" />
+                <p className="text-xs text-maroon-600 mb-2">
+                  Enable location to see sunrise and sunset times
+                </p>
+                <button
+                  onClick={handleRetryLocation}
+                  className="w-full bg-gradient-to-r from-orange-500 to-saffron-500 text-white font-bold py-2 px-4 rounded-full hover:from-orange-600 hover:to-saffron-600 transition-all shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2"
+                >
+                  <MapPin size={16} />
+                  Enable Location
+                </button>
+              </motion.div>
+            )}
+
+            {!isLoadingSunData && hasError && !showRetryButton && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="bg-red-50 border border-red-200 rounded-lg p-3 mt-6"
+              >
+                <p className="text-xs text-red-700 leading-relaxed">
+                  {locationError || sunsetSunriseError}
+                </p>
+              </motion.div>
+            )}
           </div>
         </div>
       </motion.div>
@@ -195,6 +364,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           currentTime={currentTime}
         />
       </motion.div>
+
+      <LocationPermissionModal
+        isOpen={showLocationModal}
+        onRequestLocation={handleGetSunriseSunset}
+        onClose={handleModalClose}
+        error={locationError || sunsetSunriseError}
+      />
     </section>
   );
 };
