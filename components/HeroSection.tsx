@@ -77,23 +77,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const { getLocation, location, locationError, locationLoading } =
     useGeoLocation();
 
-  // Show modal only once on component mount (client-side only)
+  // Don't show modal on mount - let user trigger it manually
   useEffect(() => {
     const hasAskedBefore = localStorage.getItem("locationPermissionAsked");
     const cachedLocation = localStorage.getItem("cached_location");
 
-    // If we have cached location, don't show modal
+    // If we have cached location, use it
     if (cachedLocation) {
       setHasAskedPermission(true);
       return;
     }
 
-    // If we haven't asked before, show modal
-    if (!hasAskedBefore) {
-      setShowLocationModal(true);
-    } else {
-      setHasAskedPermission(true);
-      // Check if permission was denied
+    // Mark that we've checked, but don't show modal automatically
+    setHasAskedPermission(true);
+
+    // Check if permission was previously denied
+    if (hasAskedBefore) {
       const denied = localStorage.getItem("locationPermissionDenied");
       if (denied === "true") {
         setPermissionDenied(true);
@@ -103,8 +102,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   // When location is obtained, fetch sunrise/sunset data
   useEffect(() => {
-    console.log("location ", location);
-
     if (location && location.lat && location.lng) {
       console.log("Location obtained:", location);
       getSunriseAndSunset(location);
@@ -123,7 +120,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   }, [locationError]);
 
   const handleGetSunriseSunset = () => {
-    console.log("User clicked Allow Location");
     setShowLocationModal(false);
     setHasAskedPermission(true);
     localStorage.setItem("locationPermissionAsked", "true");
@@ -131,7 +127,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   };
 
   const handleModalClose = () => {
-    console.log("User declined location");
     setShowLocationModal(false);
     setHasAskedPermission(true);
     setPermissionDenied(true);
@@ -140,14 +135,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   };
 
   const handleRetryLocation = () => {
-    console.log("User clicked retry location");
     setShowLocationModal(true);
   };
 
   const isLoadingSunData = locationLoading || sunsetSunriseLoading;
   const hasError = locationError || sunsetSunriseError;
-  const showRetryButton =
-    permissionDenied && !sunsetSunriseData && !isLoadingSunData;
+  // Show button if we don't have sun data AND we're not loading AND (permission was denied OR we haven't asked yet)
+  const showEnableLocationButton = !sunsetSunriseData && !isLoadingSunData;
 
   return (
     <section className="w-full max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-6">
@@ -315,8 +309,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </motion.div>
             )}
 
-            {/* Retry Button for Denied Permission */}
-            {showRetryButton && (
+            {/* Enable Location Button - Shows when no sun data and not loading */}
+            {showEnableLocationButton && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -338,11 +332,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
             {hasError && (
               <div className="mt-3 flex items-center justify-center gap-2">
-                <AlertCircle
-                  size={20}
-                  className="text-red-600 shrink-0 mt-0.5"
-                />
-                <span className="text-red-800 text-sm text-left">
+                <AlertCircle size={20} className="text-red-600 shrink-0" />
+                <span className="text-red-800 text-sm">
                   {locationError || sunsetSunriseError}
                 </span>
               </div>
