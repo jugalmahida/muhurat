@@ -336,16 +336,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </motion.div>
             )}
 
-            {!isLoadingSunData && hasError && !showRetryButton && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="bg-red-50 border border-red-200 rounded-lg p-3 mt-6"
-              >
-                <p className="text-xs text-red-700 leading-relaxed">
+            {hasError && (
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <AlertCircle
+                  size={20}
+                  className="text-red-600 shrink-0 mt-0.5"
+                />
+                <span className="text-red-800 text-sm text-left">
                   {locationError || sunsetSunriseError}
-                </p>
-              </motion.div>
+                </span>
+              </div>
             )}
           </div>
         </div>
@@ -369,7 +369,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         isOpen={showLocationModal}
         onRequestLocation={handleGetSunriseSunset}
         onClose={handleModalClose}
-        error={locationError || sunsetSunriseError}
       />
     </section>
   );

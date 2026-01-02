@@ -7,12 +7,11 @@ interface LocationPermissionModalProps {
   isOpen: boolean;
   onRequestLocation: () => void;
   onClose: () => void;
-  error?: string | null;
 }
 
 export const LocationPermissionModal: React.FC<
   LocationPermissionModalProps
-> = ({ isOpen, onRequestLocation, onClose, error }) => {
+> = ({ isOpen, onRequestLocation, onClose }) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -73,20 +72,6 @@ export const LocationPermissionModal: React.FC<
                   This helps us provide precise Muhurat timings based on your
                   geographic location.
                 </p>
-
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full bg-red-100 border-2 border-red-400 rounded-xl p-4 mb-6 flex items-start gap-3"
-                  >
-                    <AlertCircle
-                      size={20}
-                      className="text-red-600 flex-shrink-0 mt-0.5"
-                    />
-                    <p className="text-red-800 text-sm text-left">{error}</p>
-                  </motion.div>
-                )}
 
                 <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <button
