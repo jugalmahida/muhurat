@@ -144,7 +144,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const showEnableLocationButton = !sunsetSunriseData && !isLoadingSunData;
 
   return (
-    <section className="w-full max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-6">
+    <section className="w-full max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-3">
       {/* Left: Current Status Card */}
       <motion.div
         className={`relative overflow-hidden rounded-3xl p-8 border-[3px] shadow-2xl transition-colors duration-500

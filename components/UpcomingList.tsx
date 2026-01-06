@@ -16,7 +16,7 @@ export const UpcomingList: React.FC<UpcomingListProps> = ({
   const upcoming = choghadiyas.filter((c) => c.endTime > currentTime);
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8 mb-16">
+    <div className="w-full max-w-4xl mx-auto px-4 py-8 mb-5">
       <div className="text-center mb-8">
         <h3 className="text-2xl font-serif text-maroon-800 border-b-2 border-gold-400 inline-block px-8 pb-1">
           Upcoming Muhurats Today

@@ -40,7 +40,7 @@ export default function Home() {
     setCurrentMuhurat(current);
   }, [currentTime, choghadiyas]);
   return (
-    <div className="min-h-screen text-gray-900 pb-12 overflow-x-hidden">
+    <div className="min-h-screen text-gray-900 pb-6 overflow-x-hidden">
       {/* Background Mandala overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] z-0"></div>
 
